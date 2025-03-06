@@ -733,7 +733,7 @@ float sphereCollide(vec oRay, vec norRay, int o)
 }
 
 //PLANE COLLISION FUNCTION RETURNS THE TIME POINT t OF WHEN THE VECTOR HITS
-float planeCollide(vec oRay, vec refRay, int i, int j, int o2)
+float planeCollide(vec oRay, vec refRay, int o2)
 {
 	float ta, tb, tc;
 	float po, pd;
@@ -954,22 +954,13 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 	
 		collide = sphereCollide(oRay, ray, k);
 		
-		if (k != obj )
+		
+		if(m[s[k].material - 1].ref == 0)
 		{
-				
 			ambient = m[s[k].material - 1].ambient * l[0].ambient;
 			if (collide > 0)
-			{
-				
-				
+			{				
 				hit[j + (i * width)] = 1;
-				
-				//CHECK IF REFLECTIVE
-				if (m[s[k].material - 1].ref != 0)
-				{
-					sC = k;
-				}
-
 				//IF NO RAY HAS HIT AN OBJECT YET THEN THEN THE FIRST OBJECT IS SET AND ITS COLOR IS APPLIED
 				if (cl[j + (i * width)] == -1)
 				{
@@ -982,20 +973,34 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 					materialSphereCALC(oRay, ray, k, bounces, 's', collide, ambient, diffuse, specular, f, i, j);
 
 				}
-				/*
-				if (bounces != MAX_BOUNCES)
-				{
-					q[j + (i * width)].r += (c->r * 0.1) ;
-					q[j + (i * width)].g += (c->g * 0.1) ;
-					q[j + (i * width)].b += (c->b * 0.1);
-				}
-				*/
+			
 			}
-		
-			
+		}
+		else
+		{
+			//stops ray from reflecting an object with itself
+			if (k != obj )
+			{
 				
-			
-		 }
+				ambient = m[s[k].material - 1].ambient * l[0].ambient;
+				if (collide > 0)
+				{	
+					hit[j + (i * width)] = 1;
+					sC = k;			
+					//IF NO RAY HAS HIT AN OBJECT YET THEN THEN THE FIRST OBJECT IS SET AND ITS COLOR IS APPLIED
+					if (cl[j + (i * width)] == -1)
+					{
+						materialSphereCALC(oRay, ray, k, bounces,'s', collide, ambient, diffuse, specular, f, i, j);
+					}				
+					//IF ANOTHER OBJECT IS CLOSER THAN THE CURRENT CLOSEST SET THIS OBJECT TO THE CLOSEST AND APPLY OBJECT COLOR
+					if (tI[j + (i * width)] > collide)
+					{
+						materialSphereCALC(oRay, ray, k, bounces, 's', collide, ambient, diffuse, specular, f, i, j);
+
+					}
+				}				
+			}
+		}
 		 
 	}
 	
@@ -1003,7 +1008,7 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 	for (int k = 0; k < planeCount; k++)
 	{
 			//CHECK COLLISION
-			collide = planeCollide(oRay, ray,i, j, k);
+			collide = planeCollide(oRay, ray, k);
 			
 
 				if (collide > 0)
@@ -1075,7 +1080,7 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 						}
 						tI[j + (i * width)] = collide;
 
-
+						//shadows
 						for (int object = 0; object < sphereCount; object++)
 						{
 							c1 = sphereCollide(hVec[j + (i * width)], lRay, object);
@@ -1089,14 +1094,14 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 								return;
 							}
 						}
-						/*
+						
 						if (bounces != MAX_BOUNCES)
 						{
 							q[j + (i * width)].r += (c->r * 0.1) * (diffuse + ambient + specular);
 							q[j + (i * width)].g += (c->g * 0.1) * (diffuse + ambient + specular);
 							q[j + (i * width)].b += (c->b * 0.1) * (diffuse + ambient + specular);
 						}
-						*/
+						
 					}
 					if (tI[j + (i * width)] > collide)
 					{
@@ -1171,14 +1176,14 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 								return;
 							}
 						}
-						/*
+						
 						if (bounces != MAX_BOUNCES)
 						{
 							q[j + (i * width)].r += (c->r * 0.1) * (diffuse + ambient + specular);
 							q[j + (i * width)].g += (c->g * 0.1) * (diffuse + ambient + specular);
 							q[j + (i * width)].b += (c->b * 0.1) * (diffuse + ambient + specular);
 						}
-						*/
+						
 					}
 
 				
@@ -1279,25 +1284,13 @@ void update(int tHeight, int lStart2)
 				ray.y = r[(j + (i * height))].dy;
 				ray.z = r[(j + (i * height))].dz;
 
-
 				hit[j + (i * width)] = 0;
 
 				//CALL RAY TRACE ALGORITHM
 				rayShoot(oRay, ray, MAX_BOUNCES, i, j, cl[j + (i * width)]);
-
-				//q[j + (i * width)].r += (c->r * 0.01) * (diffuse + ambient + specular);
-				//q[j + (i * width)].g += (c->g * 0.01) * (diffuse + ambient + specular);
-				//q[j + (i * width)].b += (c->b * 0.01) * (diffuse + ambient + specular);
-
 				//IF OBJECT HAS COLLIDED DRAW THE OBJECT AT{j, i}
 				if (hit[j + (i * width)] != 0)
 				{
-					/*
-					glColor3f(q[j + (i * width)].r, q[j + (i * width)].g, q[j + (i * width)].b);
-					glBegin(GL_POINTS);
-					glVertex2i(j, i);
-					glEnd();
-					*/
 					o[j + (i * height)].r = q[j + (i * width)].r;
 					o[j + (i * height)].g = q[j + (i * width)].g;
 					o[j + (i * height)].b = q[j + (i * width)].b;
@@ -1320,12 +1313,7 @@ void update(int tHeight, int lStart2)
 	return;
 }
 
-void draw()
-{
 
-	//glColor3f(255, 0, 25);
-	
-}
 void threading()
 {
 	std::thread threads[processor_count];
@@ -1333,8 +1321,10 @@ void threading()
 	
 	
 	
-	/*
-	//incorrect implementation
+
+	float start = clock();
+	
+	//allocate threads and divides render by processor size
 	for (int i = 0; i < processor_count; i++)
 	{	
 		threads[i] = std::thread(update, (i+1) * (height / processor_count),  i * (height / processor_count));
@@ -1343,23 +1333,9 @@ void threading()
 	{
 		threads[i].join();
 	}
-	*/
-	float start = clock();
-	//testing
-	threads[0] = std::thread(update, height,  3 * (height/4));
-	threads[1] = std::thread(update, 3 * (height/4),  2 * (height/4));	
-	threads[2] = std::thread(update, 2 * (height/4),  (height/4));
-	threads[3] = std::thread(update, height / 4,  0);	
-	threads[0].join();
-	threads[1].join();
-	threads[2].join();
-	threads[3].join();
-	
+
 	//update(height, 0);
-	//std::cout << ((float)(clock() - start))/CLOCKS_PER_SEC << "\n";
-	
-	
-	
+	std::cout << ((float)(clock() - start))/CLOCKS_PER_SEC << "\n";
 	
 	
 	for (int i = 0; i < height; i++)
@@ -1372,10 +1348,7 @@ void threading()
 				glEnd();
 		}
 	}
-
-
 	glutSwapBuffers();
-	
 }
 
 
@@ -1459,7 +1432,7 @@ int main(int argc, char** argv)
 	//OPENGL/GLUT INITIALIZATION
 	glutInit(&argc, argv);
 	glutInitWindowSize(width, height);
-	glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
+	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
 	glutCreateWindow("RAYTRACER");
 	glutDisplayFunc(threading);
 	//CAMERA CONTROL
