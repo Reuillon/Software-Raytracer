@@ -207,11 +207,11 @@ void write_img(char* fileName)
 		exit(1);
 	}
 
-	for (int i = 0; i < height; i++)
+	for (unsigned int i = 0; i < height; i++)
 	{
-		for (int j = 0; j < width; j++)
+		for (unsigned int j = 0; j < width; j++)
 		{
-			glReadPixels(j, i, 1, 1, GL_RGB, GL_FLOAT, &q);
+			glReadPixels(j, i, 1, 1, GL_RGB, GL_FLOAT, &q[j + (i * width)]);
 			imDat.rgbRed = (GLubyte)((q[j + (i * width)].r) * 255);
 			imDat.rgbGreen = (GLubyte)((q[j + (i * width)].g) * 255);
 			imDat.rgbBlue = (GLubyte)((q[j + (i * width)].b) * 255);
@@ -816,7 +816,7 @@ float triCollide(int i, int j, int o3)
 		}
 		
 	}
-
+	return 0.0f;
 
 }
 
@@ -1356,7 +1356,7 @@ void threading()
 	threads[3].join();
 	
 	//update(height, 0);
-	std::cout << ((float)(clock() - start))/CLOCKS_PER_SEC << "\n";
+	//std::cout << ((float)(clock() - start))/CLOCKS_PER_SEC << "\n";
 	
 	
 	
@@ -1443,7 +1443,8 @@ void controls(unsigned char key)
 		case 'p':
 		{
 			printf("WRITING IMAGE TO RAYTRACEDSCENE.tiff... \n");
-			write_img("RAYTRACEDSCENE.tiff");
+			
+			write_img((char*)("RAYTRACEDSCENE.tiff"));
 			printf("IMAGE SUCCESSFULLY WRITTEN TO: RAYTRACEDSCENE.tiff!\n");
 			break;
 		}
