@@ -979,9 +979,8 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 		else
 		{
 			//stops ray from reflecting an object with itself
-			if (k != obj )
+			if (k != obj  && bounces > 1)
 			{
-				
 				ambient = m[s[k].material - 1].ambient * l[0].ambient;
 				if (collide > 0)
 				{	
@@ -1239,70 +1238,70 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 //UPDATES RENDER EVERY FRAME
 void update(int tHeight, int lStart2)
 {	
-		float temp;
-		//std::cout << tHeight << "   " << lStart2 << "\n"; 
+	float temp;
+	//std::cout << tHeight << "   " << lStart2 << "\n"; 
 	
-		//TRAVERSE THROUGH EACH PIXEL
-		for (int i = lStart2; i < tHeight; i++)
+	//TRAVERSE THROUGH EACH PIXEL
+	for (int i = lStart2; i < tHeight; i++)
+	{
+		
+		for (int j = 0; j < width; j++)
 		{
 			
-			for (int j = 0; j < width; j++)
+			//R0 AND RD VECTORS
+			vec oRay;
+			vec ray;
+			//INITIALIZE CAMERA RAY BASED ON POSITION
+			r[(j + (i * height))].ox = c->x + c->dx;
+			r[(j + (i * height))].oy = c->y + c->dy;
+			r[(j + (i * height))].oz = c->dz;
+
+			r[(j + (i * height))].x = ((j)) + c->dx;
+			r[(j + (i * height))].y = ((i)) + c->dy;
+			r[(j + (i * height))].z = ((c->z) * (-1)) + c->dz;
+
+			//CALCULATE DIRECTION VECTOR
+			r[(j + (i * height))].dx = (r[(j + (i * height))].x - r[(j + (i * height))].ox);
+			r[(j + (i * height))].dy = (r[(j + (i * height))].y - r[(j + (i * height))].oy);
+			r[(j + (i * height))].dz = (r[(j + (i * height))].z - r[(j + (i * height))].oz);
+
+			//NORMALIZE
+			temp = sqrt(square(r[(j + (i * height))].dx) + (square(r[(j + (i * height))].dy)) + (square(r[(j + (i * height))].dz)));
+
+			r[(j + (i * height))].dx /= temp;
+			r[(j + (i * height))].dy /= temp;
+			r[(j + (i * height))].dz /= temp;
+
+
+			//ASSIGN RAYS TO VECTORS TO MAKE IT SIMPLE TO PASS VECTORS THROUGH FUNCTIONS
+			oRay.x = r[(j + (i * height))].ox;
+			oRay.y = r[(j + (i * height))].oy;
+			oRay.z = r[(j + (i * height))].oz;
+
+			ray.x = r[(j + (i * height))].dx;
+			ray.y = r[(j + (i * height))].dy;
+			ray.z = r[(j + (i * height))].dz;
+
+			hit[j + (i * width)] = 0;
+
+			//CALL RAY TRACE ALGORITHM
+			rayShoot(oRay, ray, MAX_BOUNCES, i, j, cl[j + (i * width)]);
+			//IF OBJECT HAS COLLIDED DRAW THE OBJECT AT{j, i}
+			if (hit[j + (i * width)] != 0)
 			{
-				
-				//R0 AND RD VECTORS
-				vec oRay;
-				vec ray;
-
-				//INITIALIZE CAMERA RAY BASED ON POSITION
-				r[(j + (i * height))].ox = c->x + c->dx;
-				r[(j + (i * height))].oy = c->y + c->dy;
-				r[(j + (i * height))].oz = c->dz;
-
-				r[(j + (i * height))].x = ((j)) + c->dx;
-				r[(j + (i * height))].y = ((i)) + c->dy;
-				r[(j + (i * height))].z = ((c->z) * (-1)) + c->dz;
-
-				//CALCULATE DIRECTION VECTOR
-				r[(j + (i * height))].dx = (r[(j + (i * height))].x - r[(j + (i * height))].ox);
-				r[(j + (i * height))].dy = (r[(j + (i * height))].y - r[(j + (i * height))].oy);
-				r[(j + (i * height))].dz = (r[(j + (i * height))].z - r[(j + (i * height))].oz);
-
-				//NORMALIZE
-				temp = sqrt(square(r[(j + (i * height))].dx) + (square(r[(j + (i * height))].dy)) + (square(r[(j + (i * height))].dz)));
-
-				r[(j + (i * height))].dx /= temp;
-				r[(j + (i * height))].dy /= temp;
-				r[(j + (i * height))].dz /= temp;
-
-
-				//ASSIGN RAYS TO VECTORS TO MAKE IT SIMPLE TO PASS VECTORS THROUGH FUNCTIONS
-				oRay.x = r[(j + (i * height))].ox;
-				oRay.y = r[(j + (i * height))].oy;
-				oRay.z = r[(j + (i * height))].oz;
-
-				ray.x = r[(j + (i * height))].dx;
-				ray.y = r[(j + (i * height))].dy;
-				ray.z = r[(j + (i * height))].dz;
-
-				hit[j + (i * width)] = 0;
-
-				//CALL RAY TRACE ALGORITHM
-				rayShoot(oRay, ray, MAX_BOUNCES, i, j, cl[j + (i * width)]);
-				//IF OBJECT HAS COLLIDED DRAW THE OBJECT AT{j, i}
-				if (hit[j + (i * width)] != 0)
-				{
-					o[j + (i * height)].r = q[j + (i * width)].r;
-					o[j + (i * height)].g = q[j + (i * width)].g;
-					o[j + (i * height)].b = q[j + (i * width)].b;
-				}
-				else
-				{
-					o[j + (i * height)].r = 0.05;
-					o[j + (i * height)].g = 0.2;
-					o[j + (i * height)].b = 0.5;
-				}
+				o[j + (i * height)].r = q[j + (i * width)].r;
+				o[j + (i * height)].g = q[j + (i * width)].g;
+				o[j + (i * height)].b = q[j + (i * width)].b;
 			}
-
+			else
+			{
+				o[j + (i * height)].r = 0.05;
+				o[j + (i * height)].g = 0.2;
+				o[j + (i * height)].b = 0.5;
+			}
+			
+		}
+		
 	}
 		
 	
@@ -1334,21 +1333,20 @@ void threading()
 		threads[i].join();
 	}
 
-	//update(height, 0);
-	std::cout << ((float)(clock() - start))/CLOCKS_PER_SEC << "\n";
 	
+	glBegin(GL_POINTS);
 	
 	for (int i = 0; i < height; i++)
 	{
 		for (int j = 0; j < width; j++)
-		{
-				glColor3f(o[j + (i*height)].r, o[j + (i*height)].g, o[j + (i*height)].b);
-				glBegin(GL_POINTS);
-					glVertex2i(j, i);
-				glEnd();
+		{	
+			glColor3f(o[j + (i*height)].r, o[j + (i*height)].g, o[j + (i*height)].b);
+			glVertex2i(j, i);
 		}
 	}
+	glEnd();
 	glutSwapBuffers();
+	std::cout << ((float)(1 / (((clock() - start))/CLOCKS_PER_SEC))) << "\n";
 }
 
 
