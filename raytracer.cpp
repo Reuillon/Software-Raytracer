@@ -166,6 +166,8 @@ tri* t;
 mat* m;
 light* l;
 
+
+
 //OBJECT QUANTITIES
 short int sphereCount = 0;
 short int planeCount = 0;
@@ -182,12 +184,16 @@ light* lT;
 pixel* q;
 pixel* o;
 
+
+
+
 //Hit VALUE FOR EACH PIXEL ON SCREEN
 int* hit;
 int* cl;
 float* tI;
-//GENERAL LIGHT RAY VECTOR
 
+
+//GENERAL LIGHT RAY VECTOR
 vec* refVec;
 vec* rVec;
 vec* hVec;
@@ -939,10 +945,13 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 	int sC;
 	int pC;
 	
+	//ray vector
 	lRay.x = l[0].x;
 	lRay.y = l[0].y;
 	lRay.z = l[0].z;
 	cl[j + (i * width)] = -1;
+	
+	//amount of collisionts
 	pC = -1;
 	sC = -1;
 
@@ -961,6 +970,7 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 			if (collide > 0)
 			{				
 				hit[j + (i * width)] = 1;
+				sC = k;	
 				//IF NO RAY HAS HIT AN OBJECT YET THEN THEN THE FIRST OBJECT IS SET AND ITS COLOR IS APPLIED
 				if (cl[j + (i * width)] == -1)
 				{
@@ -1012,9 +1022,11 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 
 				if (collide > 0)
 				{
+					
 					hit[j + (i * width)] = 1;
 					if (m[p[k].material - 1].ref != 0)
 					{
+						sC = k;	
 						pC = k;
 					}
 					//AMBIENT LIGHT CO EFFICIENT
@@ -1022,6 +1034,8 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 
 					if (cl[j + (i * width)] == -1)
 					{
+						sC = k;	
+						pC = k;
 						//HITSPOT NORMALIZE
 						hVec[j + (i * width)].x = (ray.x * collide + oRay.x);
 						hVec[j + (i * width)].y = (ray.y * collide + oRay.y);
@@ -1104,6 +1118,8 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 					}
 					if (tI[j + (i * width)] > collide)
 					{
+						sC = k;	
+						pC = k;
 						//HITSPOT NORMALIZE
 						hVec[j + (i * width)].x = (ray.x * collide + oRay.x);
 						hVec[j + (i * width)].y = (ray.y * collide + oRay.y);
@@ -1327,10 +1343,14 @@ void threading()
 	for (int i = 0; i < processor_count; i++)
 	{	
 		threads[i] = std::thread(update, (i+1) * (height / processor_count),  i * (height / processor_count));
+		//RUN ASYNC
+		//threads[i].detach();
 	}
 	for (int i = 0; i < processor_count; i++)
 	{
+		//RUN WHEN ALL THREADS ARE FINISHED
 		threads[i].join();
+		
 	}
 
 	
@@ -1449,4 +1469,24 @@ int main(int argc, char** argv)
 	
 	glutMainLoop();
 	
+	free(rVec);
+	free(hVec);
+	free(refVec);
+	free(r);
+	free(c);
+	free(s);
+	free(p);
+	free(t);
+	free(m);
+	free(l);
+	free(sT);
+	free(pT);
+	free(tT);
+	free(mT);
+	free(lT);
+	free(q);
+	free(o);
+	free(hit);
+	free(cl);
+	free(tI);
 }
