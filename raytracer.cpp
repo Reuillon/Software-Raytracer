@@ -1,14 +1,17 @@
+//C Libraries
 #include <ctime>
+#include <math.h>
+#include <stdio.h>
+
+//C++ Libraries
+#include <thread>
+
+//External Libraries
 #include "GL/gl.h"
 #include "GL/glut.h"
-#include <stdio.h>
-#include <stdbool.h>
-#include <thread>
-#include <iostream>
-
 #include <FreeImage.h>
-#include <math.h>
 
+//NUMBER OF BOUNCES FOR EACH RAY
 int MAX_BOUNCES = 4;
 
 //WINDOW DIMENSIONS
@@ -29,7 +32,6 @@ typedef struct vector
 	float y;
 	float z;
 }vec;
-
 
 //MATERIAL STRUCTURE
 typedef struct mat
@@ -110,8 +112,6 @@ typedef struct ray
 
 }ray;
 
-
-
 //PLANE DATA STRUCTURE
 typedef struct plane
 {
@@ -166,8 +166,6 @@ tri* t;
 mat* m;
 light* l;
 
-
-
 //OBJECT QUANTITIES
 short int sphereCount = 0;
 short int planeCount = 0;
@@ -184,20 +182,17 @@ light* lT;
 pixel* q;
 pixel* o;
 
-
-
-
 //Hit VALUE FOR EACH PIXEL ON SCREEN
 int* hit;
 int* cl;
 float* tI;
 
-//GENERAL LIGHT RAY VECTOR
+//GENERAL LIGHT RAY VECTORS
 vec* refVec;
 vec* rVec;
 vec* hVec;
 
-//GETS PIXEL X AND Y AND CONVERTS INTO CORRESPONDING 1D ARRAY VALUE
+//GETS PIXEL X AND Y AND CONVERTS INTO CORRESPONDING 1D ARRAY VALUE (USED FOR BETTER READABILITY)
 int getPixel(int i, int j)
 {
 	return (i + (j * height));
@@ -1260,7 +1255,6 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 void update(int tHeight, int lStart2)
 {	
 	float temp;
-	//std::cout << tHeight << "   " << lStart2 << "\n"; 
 	
 	//TRAVERSE THROUGH EACH PIXEL
 	for (int i = lStart2; i < tHeight; i++)
@@ -1371,12 +1365,12 @@ void threading()
 	}
 	glEnd();
 	glutSwapBuffers();
-	std::cout << ((float)(1 / (((clock() - start))/CLOCKS_PER_SEC))) << "\n";
+	printf("%f\n",((float)(1 / (((clock() - start))/CLOCKS_PER_SEC))));
 }
 
 
 //KEYBOARD PRESSES
-void controls(unsigned char key)
+void controls(unsigned char key, int x, int y)
 {
 	//WASD CONTROLS
 	//Q AND E TO ASCEND AND DESCEND
