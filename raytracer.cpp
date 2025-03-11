@@ -192,12 +192,16 @@ int* hit;
 int* cl;
 float* tI;
 
-
 //GENERAL LIGHT RAY VECTOR
 vec* refVec;
 vec* rVec;
 vec* hVec;
 
+//GETS PIXEL X AND Y AND CONVERTS INTO CORRESPONDING 1D ARRAY VALUE
+int getPixel(int i, int j)
+{
+	return (i + (j * height));
+}
 
 //GETS PIXEL FROM THE SCENE USING glReadPixels AND CREATES AND SAVES IMAGE USING FREE IMAGE
 void write_img(char* fileName)
@@ -217,10 +221,10 @@ void write_img(char* fileName)
 	{
 		for (unsigned int j = 0; j < width; j++)
 		{
-			glReadPixels(j, i, 1, 1, GL_RGB, GL_FLOAT, &q[j + (i * width)]);
-			imDat.rgbRed = (GLubyte)((q[j + (i * width)].r) * 255);
-			imDat.rgbGreen = (GLubyte)((q[j + (i * width)].g) * 255);
-			imDat.rgbBlue = (GLubyte)((q[j + (i * width)].b) * 255);
+			glReadPixels(j, i, 1, 1, GL_RGB, GL_FLOAT, &q[getPixel(i, j)]);
+			imDat.rgbRed = (GLubyte)((q[getPixel(i, j)].r) * 255);
+			imDat.rgbGreen = (GLubyte)((q[getPixel(i, j)].g) * 255);
+			imDat.rgbBlue = (GLubyte)((q[getPixel(i, j)].b) * 255);
 			
 			FreeImage_SetPixelColor(output, j, i, &imDat);
 
@@ -241,6 +245,7 @@ void write_img(char* fileName)
 
 	FreeImage_Unload(output);
 }
+
 
 
 //FUNCTION FOR EXPONENT OF 2
@@ -680,9 +685,9 @@ void setupScene()
 	{
 		for (int j = 0; j < width; j++)
 		{
-			hit[j + (i * width)] = 0;		
-			cl[j + (i * width)] = -1;		
-			tI[j + (i * width)] = 0;		
+			hit[getPixel(i, j)] = 0;		
+			cl[getPixel(i, j)] = -1;		
+			tI[getPixel(i, j)] = 0;		
 		}
 	}
 	
@@ -775,7 +780,7 @@ float triCollide(int i, int j, int o3)
 	vec v1, v2;
 	float to;
 	float td;
-	t[(j + (i * height))].p1[o3];
+	t[getPixel(i, j)].p1[o3];
 	v1.x = t[o3].p2[0] - t[o3].p1[0];
 	v1.y = t[o3].p2[1] - t[o3].p1[1];
 	v1.z = t[o3].p2[2] - t[o3].p1[2];
@@ -794,8 +799,8 @@ float triCollide(int i, int j, int o3)
 
 
 
-	to = (v1.x * r[(j + (i * height))].ox) + (v1.y * r[(j + (i * height))].oy) + (v1.z * r[(j + (i * height))].oz) + 0;
-	td = (v1.x * r[(j + (i * height))].dx) + (v1.y * r[(j + (i * height))].dy) + (v1.z * r[(j + (i * height))].dz) + 0;
+	to = (v1.x * r[getPixel(i, j)].ox) + (v1.y * r[getPixel(i, j)].oy) + (v1.z * r[getPixel(i, j)].oz) + 0;
+	td = (v1.x * r[getPixel(i, j)].dx) + (v1.y * r[getPixel(i, j)].dy) + (v1.z * r[getPixel(i, j)].dz) + 0;
 
 
 
@@ -855,41 +860,41 @@ void materialSphereCALC(vec oRay, vec ray, int k, int bounces, char obj, float c
 	float c0;
 	float dot;
 	//HITSPOT VECTOR
-	hVec[j + (i * width)].x = (ray.x * collide + oRay.x);
-	hVec[j + (i * width)].y = (ray.y * collide + oRay.y);
-	hVec[j + (i * width)].z = (ray.z * collide + oRay.z);
+	hVec[getPixel(i, j)].x = (ray.x * collide + oRay.x);
+	hVec[getPixel(i, j)].y = (ray.y * collide + oRay.y);
+	hVec[getPixel(i, j)].z = (ray.z * collide + oRay.z);
 
 	//NORMAL OF HITSPOT OF THE SPHERE
 	if (obj == 's')
 	{
-		rVec[j + (i * width)].x = ((hVec[j + (i * width)].x) - s[k].x) / s[k].radius;
-		rVec[j + (i * width)].y = ((hVec[j + (i * width)].y) - s[k].y) / s[k].radius;
-		rVec[j + (i * width)].z = ((hVec[j + (i * width)].z) - s[k].z) / s[k].radius;
+		rVec[getPixel(i, j)].x = ((hVec[getPixel(i, j)].x) - s[k].x) / s[k].radius;
+		rVec[getPixel(i, j)].y = ((hVec[getPixel(i, j)].y) - s[k].y) / s[k].radius;
+		rVec[getPixel(i, j)].z = ((hVec[getPixel(i, j)].z) - s[k].z) / s[k].radius;
 	}
 	if (obj == 'p')
 	{
-		rVec[j + (i * width)].x = ((hVec[j + (i * width)].x));
-		rVec[j + (i * width)].y = -((hVec[j + (i * width)].y));
-		rVec[j + (i * width)].z = ((hVec[j + (i * width)].z));
+		rVec[getPixel(i, j)].x = ((hVec[getPixel(i, j)].x));
+		rVec[getPixel(i, j)].y = -((hVec[getPixel(i, j)].y));
+		rVec[getPixel(i, j)].z = ((hVec[getPixel(i, j)].z));
 	}
 	//NORMALIZE
-	rVec[j + (i * width)] = normalize(rVec[j + (i * width)]);
+	rVec[getPixel(i, j)] = normalize(rVec[getPixel(i, j)]);
 
 
 	//REFLECTION COSINE AND RAY NORMAL VECTOR
-	dot = (rVec[j + (i * width)].x * ray.x) + (rVec[j + (i * width)].y * ray.y) + (rVec[j + (i * width)].z * ray.z);
-	refVec[j + (i * width)].x = (ray.x) - 2 * (dot)*rVec[j + (i * width)].x;
-	refVec[j + (i * width)].y = (ray.y) - 2 * (dot)*rVec[j + (i * width)].y;
-	refVec[j + (i * width)].z = (ray.z) - 2 * (dot)*rVec[j + (i * width)].z;
+	dot = (rVec[getPixel(i, j)].x * ray.x) + (rVec[getPixel(i, j)].y * ray.y) + (rVec[getPixel(i, j)].z * ray.z);
+	refVec[getPixel(i, j)].x = (ray.x) - 2 * (dot)*rVec[getPixel(i, j)].x;
+	refVec[getPixel(i, j)].y = (ray.y) - 2 * (dot)*rVec[getPixel(i, j)].y;
+	refVec[getPixel(i, j)].z = (ray.z) - 2 * (dot)*rVec[getPixel(i, j)].z;
 
 	//NORMALIZE
-	refVec[j + (i * width)] = normalize(refVec[j + (i * width)]);
+	refVec[getPixel(i, j)] = normalize(refVec[getPixel(i, j)]);
 
 
 	if (m[s[k].material - 1].diffuse != 0)
 	{
 		//DIFFUSE COSINE
-		c0 = (rVec[j + (i * width)].x * l[0].x) + (rVec[j + (i * width)].y * l[0].y) + (rVec[j + (i * width)].z * l[0].z);
+		c0 = (rVec[getPixel(i, j)].x * l[0].x) + (rVec[getPixel(i, j)].y * l[0].y) + (rVec[getPixel(i, j)].z * l[0].z);
 		diffuse = m[s[k].material - 1].diffuse * l[0].intensity * c0;
 	}
 
@@ -897,31 +902,31 @@ void materialSphereCALC(vec oRay, vec ray, int k, int bounces, char obj, float c
 	{
 		//SPECULAR COSINE CALCULATION
 		f = m[s[k].material - 1].fCo;
-		c0 = pow((refVec[j + (i * width)].x * ray.x) + (refVec[j + (i * width)].y * ray.y) + (refVec[j + (i * width)].z * ray.z), f);
+		c0 = pow((refVec[getPixel(i, j)].x * ray.x) + (refVec[getPixel(i, j)].y * ray.y) + (refVec[getPixel(i, j)].z * ray.z), f);
 		specular = m[s[k].material - 1].specular * l[0].intensity * c0;
 	}
 
 	//COLOR CALCULATION
-	cl[j + (i * width)] = k;
+	cl[getPixel(i, j)] = k;
 	float mat = diffuse + ambient + specular;
 
 
 	
 	if (bounces != MAX_BOUNCES)
 	{
-		q[j + (i * width)].r += (s[k].r * (mat) * 0.5);
-		q[j + (i * width)].g += (s[k].g * (mat) * 0.5);
-		q[j + (i * width)].b += (s[k].b * (mat) * 0.5);
+		q[getPixel(i, j)].r += (s[k].r * (mat) * 0.5);
+		q[getPixel(i, j)].g += (s[k].g * (mat) * 0.5);
+		q[getPixel(i, j)].b += (s[k].b * (mat) * 0.5);
 	}
 	else
 	{
-		q[j + (i * width)].r = (s[k].r * (mat) * 0.9);
-		q[j + (i * width)].g = (s[k].g * (mat) * 0.9);
-		q[j + (i * width)].b = (s[k].b * (mat) * 0.9);
+		q[getPixel(i, j)].r = (s[k].r * (mat) * 0.9);
+		q[getPixel(i, j)].g = (s[k].g * (mat) * 0.9);
+		q[getPixel(i, j)].b = (s[k].b * (mat) * 0.9);
 	}
 
 
-	tI[j + (i * width)] = collide;
+	tI[getPixel(i, j)] = collide;
 	
 }
 
@@ -949,7 +954,7 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 	lRay.x = l[0].x;
 	lRay.y = l[0].y;
 	lRay.z = l[0].z;
-	cl[j + (i * width)] = -1;
+	cl[getPixel(i, j)] = -1;
 	
 	//amount of collisionts
 	pC = -1;
@@ -969,16 +974,16 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 			ambient = m[s[k].material - 1].ambient * l[0].ambient;
 			if (collide > 0)
 			{				
-				hit[j + (i * width)] = 1;
+				hit[getPixel(i, j)] = 1;
 				sC = k;	
 				//IF NO RAY HAS HIT AN OBJECT YET THEN THEN THE FIRST OBJECT IS SET AND ITS COLOR IS APPLIED
-				if (cl[j + (i * width)] == -1)
+				if (cl[getPixel(i, j)] == -1)
 				{
 					materialSphereCALC(oRay, ray, k, bounces,'s', collide, ambient, diffuse, specular, f, i, j);
 				}
 				
 				//IF ANOTHER OBJECT IS CLOSER THAN THE CURRENT CLOSEST SET THIS OBJECT TO THE CLOSEST AND APPLY OBJECT COLOR
-				if (tI[j + (i * width)] > collide)
+				if (tI[getPixel(i, j)] > collide)
 				{
 					materialSphereCALC(oRay, ray, k, bounces, 's', collide, ambient, diffuse, specular, f, i, j);
 
@@ -994,15 +999,15 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 				ambient = m[s[k].material - 1].ambient * l[0].ambient;
 				if (collide > 0)
 				{	
-					hit[j + (i * width)] = 1;
+					hit[getPixel(i, j)] = 1;
 					sC = k;			
 					//IF NO RAY HAS HIT AN OBJECT YET THEN THEN THE FIRST OBJECT IS SET AND ITS COLOR IS APPLIED
-					if (cl[j + (i * width)] == -1)
+					if (cl[getPixel(i, j)] == -1)
 					{
 						materialSphereCALC(oRay, ray, k, bounces,'s', collide, ambient, diffuse, specular, f, i, j);
 					}				
 					//IF ANOTHER OBJECT IS CLOSER THAN THE CURRENT CLOSEST SET THIS OBJECT TO THE CLOSEST AND APPLY OBJECT COLOR
-					if (tI[j + (i * width)] > collide)
+					if (tI[getPixel(i, j)] > collide)
 					{
 						materialSphereCALC(oRay, ray, k, bounces, 's', collide, ambient, diffuse, specular, f, i, j);
 
@@ -1023,7 +1028,7 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 				if (collide > 0)
 				{
 					
-					hit[j + (i * width)] = 1;
+					hit[getPixel(i, j)] = 1;
 					if (m[p[k].material - 1].ref != 0)
 					{
 						sC = k;	
@@ -1032,38 +1037,38 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 					//AMBIENT LIGHT CO EFFICIENT
 					ambient = m[p[k].material - 1].ambient * l[0].ambient;
 
-					if (cl[j + (i * width)] == -1)
+					if (cl[getPixel(i, j)] == -1)
 					{
 						sC = k;	
 						pC = k;
 						//HITSPOT NORMALIZE
-						hVec[j + (i * width)].x = (ray.x * collide + oRay.x);
-						hVec[j + (i * width)].y = (ray.y * collide + oRay.y);
-						hVec[j + (i * width)].z = (ray.z * collide + oRay.z);
+						hVec[getPixel(i, j)].x = (ray.x * collide + oRay.x);
+						hVec[getPixel(i, j)].y = (ray.y * collide + oRay.y);
+						hVec[getPixel(i, j)].z = (ray.z * collide + oRay.z);
 
 
 
 						//NORMAL VEC
-						rVec[j + (i * width)].x = ((hVec[j + (i * width)].x));
-						rVec[j + (i * width)].y = -((hVec[j + (i * width)].y));
-						rVec[j + (i * width)].z = ((hVec[j + (i * width)].z));
+						rVec[getPixel(i, j)].x = ((hVec[getPixel(i, j)].x));
+						rVec[getPixel(i, j)].y = -((hVec[getPixel(i, j)].y));
+						rVec[getPixel(i, j)].z = ((hVec[getPixel(i, j)].z));
 
-						rVec[j + (i * width)] = normalize(rVec[j + (i * width)]);
-
-
+						rVec[getPixel(i, j)] = normalize(rVec[getPixel(i, j)]);
 
 
-						dot = (rVec[j + (i * width)].x * ray.x) + (rVec[j + (i * width)].y * ray.y) + (rVec[j + (i * width)].z * ray.z);
-						refVec[j + (i * width)].x = (ray.x) - 2 * (dot)*rVec[j + (i * width)].x;
-						refVec[j + (i * width)].y = (ray.y) - 2 * (dot)*rVec[j + (i * width)].y;
-						refVec[j + (i * width)].z = (ray.z) - 2 * (dot)*rVec[j + (i * width)].z;
 
-						refVec[j + (i * width)] = normalize(refVec[j + (i * width)]);
+
+						dot = (rVec[getPixel(i, j)].x * ray.x) + (rVec[getPixel(i, j)].y * ray.y) + (rVec[getPixel(i, j)].z * ray.z);
+						refVec[getPixel(i, j)].x = (ray.x) - 2 * (dot)*rVec[getPixel(i, j)].x;
+						refVec[getPixel(i, j)].y = (ray.y) - 2 * (dot)*rVec[getPixel(i, j)].y;
+						refVec[getPixel(i, j)].z = (ray.z) - 2 * (dot)*rVec[getPixel(i, j)].z;
+
+						refVec[getPixel(i, j)] = normalize(refVec[getPixel(i, j)]);
 
 						if (m[p[k].material - 1].diffuse != 0)
 						{
 							//DIFFUSE COSINE
-							c0 = (rVec[j + (i * width)].x * l[0].x) + (rVec[j + (i * width)].y * l[0].y) + (rVec[j + (i * width)].z * l[0].z);
+							c0 = (rVec[getPixel(i, j)].x * l[0].x) + (rVec[getPixel(i, j)].y * l[0].y) + (rVec[getPixel(i, j)].z * l[0].z);
 							diffuse = m[p[k].material - 1].diffuse * l[0].intensity * c0;
 						}
 
@@ -1071,38 +1076,38 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 						{
 							//SPECULAR COSINE CALCULATION
 							f = m[p[k].material - 1].fCo;
-							c0 = pow((refVec[j + (i * width)].x * ray.x) + (refVec[j + (i * width)].y * ray.y) + (refVec[j + (i * width)].z * ray.z), f);
+							c0 = pow((refVec[getPixel(i, j)].x * ray.x) + (refVec[getPixel(i, j)].y * ray.y) + (refVec[getPixel(i, j)].z * ray.z), f);
 							specular = m[p[k].material - 1].specular * l[0].intensity * c0;
 						}
 
 						//COLOR CALCULATION
-						cl[j + (i * width)] = k;
+						cl[getPixel(i, j)] = k;
 						float mat = diffuse + ambient + specular;
 
 						if (bounces != MAX_BOUNCES)
 						{
-							q[j + (i * width)].r += (p[k].r * (mat) * 0.5);
-							q[j + (i * width)].g += (p[k].g * (mat) * 0.5);
-							q[j + (i * width)].b += (p[k].b * (mat) * 0.5);
+							q[getPixel(i, j)].r += (p[k].r * (mat) * 0.5);
+							q[getPixel(i, j)].g += (p[k].g * (mat) * 0.5);
+							q[getPixel(i, j)].b += (p[k].b * (mat) * 0.5);
 						}
 						else
 						{
-							q[j + (i * width)].r = (p[k].r * (mat) * 0.9);
-							q[j + (i * width)].g = (p[k].g * (mat) * 0.9);
-							q[j + (i * width)].b = (p[k].b * (mat) * 0.9);
+							q[getPixel(i, j)].r = (p[k].r * (mat) * 0.9);
+							q[getPixel(i, j)].g = (p[k].g * (mat) * 0.9);
+							q[getPixel(i, j)].b = (p[k].b * (mat) * 0.9);
 						}
-						tI[j + (i * width)] = collide;
+						tI[getPixel(i, j)] = collide;
 
 						//shadows
 						for (int object = 0; object < sphereCount; object++)
 						{
-							c1 = sphereCollide(hVec[j + (i * width)], lRay, object);
+							c1 = sphereCollide(hVec[getPixel(i, j)], lRay, object);
 							if (c1 > 0)
 							{
 
-								q[j + (i * width)].r = q[j + (i * width)].r / 2;
-								q[j + (i * width)].g = q[j + (i * width)].g / 2;
-								q[j + (i * width)].b = q[j + (i * width)].b / 2;
+								q[getPixel(i, j)].r = q[getPixel(i, j)].r / 2;
+								q[getPixel(i, j)].g = q[getPixel(i, j)].g / 2;
+								q[getPixel(i, j)].b = q[getPixel(i, j)].b / 2;
 								object = sphereCount;
 								return;
 							}
@@ -1110,44 +1115,44 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 						
 						if (bounces != MAX_BOUNCES)
 						{
-							q[j + (i * width)].r += (c->r * 0.1) * (diffuse + ambient + specular);
-							q[j + (i * width)].g += (c->g * 0.1) * (diffuse + ambient + specular);
-							q[j + (i * width)].b += (c->b * 0.1) * (diffuse + ambient + specular);
+							q[getPixel(i, j)].r += (c->r * 0.1) * (diffuse + ambient + specular);
+							q[getPixel(i, j)].g += (c->g * 0.1) * (diffuse + ambient + specular);
+							q[getPixel(i, j)].b += (c->b * 0.1) * (diffuse + ambient + specular);
 						}
 						
 					}
-					if (tI[j + (i * width)] > collide)
+					if (tI[getPixel(i, j)] > collide)
 					{
 						sC = k;	
 						pC = k;
 						//HITSPOT NORMALIZE
-						hVec[j + (i * width)].x = (ray.x * collide + oRay.x);
-						hVec[j + (i * width)].y = (ray.y * collide + oRay.y);
-						hVec[j + (i * width)].z = (ray.z * collide + oRay.z);
+						hVec[getPixel(i, j)].x = (ray.x * collide + oRay.x);
+						hVec[getPixel(i, j)].y = (ray.y * collide + oRay.y);
+						hVec[getPixel(i, j)].z = (ray.z * collide + oRay.z);
 
 
 
 						//NORMAL VEC
-						rVec[j + (i * width)].x = ((hVec[j + (i * width)].x));
-						rVec[j + (i * width)].y = -((hVec[j + (i * width)].y));
-						rVec[j + (i * width)].z = ((hVec[j + (i * width)].z));
+						rVec[getPixel(i, j)].x = ((hVec[getPixel(i, j)].x));
+						rVec[getPixel(i, j)].y = -((hVec[getPixel(i, j)].y));
+						rVec[getPixel(i, j)].z = ((hVec[getPixel(i, j)].z));
 
-						rVec[j + (i * width)] = normalize(rVec[j + (i * width)]);
-
-
+						rVec[getPixel(i, j)] = normalize(rVec[getPixel(i, j)]);
 
 
-						dot = (rVec[j + (i * width)].x * ray.x) + (rVec[j + (i * width)].y * ray.y) + (rVec[j + (i * width)].z * ray.z);
-						refVec[j + (i * width)].x = (ray.x) - 2 * (dot)*rVec[j + (i * width)].x;
-						refVec[j + (i * width)].y = (ray.y) - 2 * (dot)*rVec[j + (i * width)].y;
-						refVec[j + (i * width)].z = (ray.z) - 2 * (dot)*rVec[j + (i * width)].z;
 
-						refVec[j + (i * width)] = normalize(refVec[j + (i * width)]);
+
+						dot = (rVec[getPixel(i, j)].x * ray.x) + (rVec[getPixel(i, j)].y * ray.y) + (rVec[getPixel(i, j)].z * ray.z);
+						refVec[getPixel(i, j)].x = (ray.x) - 2 * (dot)*rVec[getPixel(i, j)].x;
+						refVec[getPixel(i, j)].y = (ray.y) - 2 * (dot)*rVec[getPixel(i, j)].y;
+						refVec[getPixel(i, j)].z = (ray.z) - 2 * (dot)*rVec[getPixel(i, j)].z;
+
+						refVec[getPixel(i, j)] = normalize(refVec[getPixel(i, j)]);
 
 						if (m[p[k].material - 1].diffuse != 0)
 						{
 							//DIFFUSE COSINE
-							c0 = (rVec[j + (i * width)].x * l[0].x) + (rVec[j + (i * width)].y * l[0].y) + (rVec[j + (i * width)].z * l[0].z);
+							c0 = (rVec[getPixel(i, j)].x * l[0].x) + (rVec[getPixel(i, j)].y * l[0].y) + (rVec[getPixel(i, j)].z * l[0].z);
 							diffuse = m[p[k].material - 1].diffuse * l[0].intensity * c0;
 						}
 
@@ -1155,38 +1160,38 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 						{
 							//SPECULAR COSINE CALCULATION
 							f = m[p[k].material - 1].fCo;
-							c0 = pow((refVec[j + (i * width)].x * ray.x) + (refVec[j + (i * width)].y * ray.y) + (refVec[j + (i * width)].z * ray.z), f);
+							c0 = pow((refVec[getPixel(i, j)].x * ray.x) + (refVec[getPixel(i, j)].y * ray.y) + (refVec[getPixel(i, j)].z * ray.z), f);
 							specular = m[p[k].material - 1].specular * l[0].intensity * c0;
 						}
 
 						//COLOR CALCULATION
-						cl[j + (i * width)] = k;
+						cl[getPixel(i, j)] = k;
 						float mat = diffuse + ambient + specular;
 
 
 						if (bounces != MAX_BOUNCES)
 						{
-							q[j + (i * width)].r += (p[k].r * (mat) * 0.5);
-							q[j + (i * width)].g += (p[k].g * (mat) * 0.5);
-							q[j + (i * width)].b += (p[k].b * (mat) * 0.5);
+							q[getPixel(i, j)].r += (p[k].r * (mat) * 0.5);
+							q[getPixel(i, j)].g += (p[k].g * (mat) * 0.5);
+							q[getPixel(i, j)].b += (p[k].b * (mat) * 0.5);
 						}
 						else
 						{
-							q[j + (i * width)].r = (p[k].r * (mat) * 0.9);
-							q[j + (i * width)].g = (p[k].g * (mat) * 0.9);
-							q[j + (i * width)].b = (p[k].b * (mat) * 0.9);
+							q[getPixel(i, j)].r = (p[k].r * (mat) * 0.9);
+							q[getPixel(i, j)].g = (p[k].g * (mat) * 0.9);
+							q[getPixel(i, j)].b = (p[k].b * (mat) * 0.9);
 						}
 
-						tI[j + (i * width)] = collide;
+						tI[getPixel(i, j)] = collide;
 
 						for (int object = 0; object < sphereCount; object++)
 						{
-							c1 = sphereCollide(hVec[j + (i * width)], lRay, object);
+							c1 = sphereCollide(hVec[getPixel(i, j)], lRay, object);
 							if (c1 > 0)
 							{
-								q[j + (i * width)].r = q[j + (i * width)].r / 2;
-								q[j + (i * width)].g = q[j + (i * width)].g / 2;
-								q[j + (i * width)].b = q[j + (i * width)].b / 2;
+								q[getPixel(i, j)].r = q[getPixel(i, j)].r / 2;
+								q[getPixel(i, j)].g = q[getPixel(i, j)].g / 2;
+								q[getPixel(i, j)].b = q[getPixel(i, j)].b / 2;
 								object = sphereCount;
 								return;
 							}
@@ -1194,9 +1199,9 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 						
 						if (bounces != MAX_BOUNCES)
 						{
-							q[j + (i * width)].r += (c->r * 0.1) * (diffuse + ambient + specular);
-							q[j + (i * width)].g += (c->g * 0.1) * (diffuse + ambient + specular);
-							q[j + (i * width)].b += (c->b * 0.1) * (diffuse + ambient + specular);
+							q[getPixel(i, j)].r += (c->r * 0.1) * (diffuse + ambient + specular);
+							q[getPixel(i, j)].g += (c->g * 0.1) * (diffuse + ambient + specular);
+							q[getPixel(i, j)].b += (c->b * 0.1) * (diffuse + ambient + specular);
 						}
 						
 					}
@@ -1219,10 +1224,10 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 		{
 			if (bounces > 1)
 			{
-				q[j + (i * width)].r *= 0.9;
-				q[j + (i * width)].g *= 0.9;
-				q[j + (i * width)].b *= 0.9;
-				rayShoot(hVec[j + (i * width)],refVec[j + (i * width)], --bounces, i, j, cl[j + (i * width)]);
+				q[getPixel(i, j)].r *= 0.9;
+				q[getPixel(i, j)].g *= 0.9;
+				q[getPixel(i, j)].b *= 0.9;
+				rayShoot(hVec[getPixel(i, j)],refVec[getPixel(i, j)], --bounces, i, j, cl[getPixel(i, j)]);
 				
 			}
 
@@ -1235,7 +1240,7 @@ void rayShoot(vec oRay, vec ray, int bounces, int i, int j, int obj)
 			if (bounces > 1)
 			{
 
-				rayShoot(hVec[j + (i * width)], refVec[j + (i * width)], --bounces, i, j, cl[j + (i * width)]);
+				rayShoot(hVec[getPixel(i, j)], refVec[getPixel(i, j)], --bounces, i, j, cl[getPixel(i, j)]);
 			}
 		}
 	}
@@ -1268,52 +1273,52 @@ void update(int tHeight, int lStart2)
 			vec oRay;
 			vec ray;
 			//INITIALIZE CAMERA RAY BASED ON POSITION
-			r[(j + (i * height))].ox = c->x + c->dx;
-			r[(j + (i * height))].oy = c->y + c->dy;
-			r[(j + (i * height))].oz = c->dz;
+			r[getPixel(i, j)].ox = c->x + c->dx;
+			r[getPixel(i, j)].oy = c->y + c->dy;
+			r[getPixel(i, j)].oz = c->dz;
 
-			r[(j + (i * height))].x = ((j)) + c->dx;
-			r[(j + (i * height))].y = ((i)) + c->dy;
-			r[(j + (i * height))].z = ((c->z) * (-1)) + c->dz;
+			r[getPixel(i, j)].x = ((j)) + c->dx;
+			r[getPixel(i, j)].y = ((i)) + c->dy;
+			r[getPixel(i, j)].z = ((c->z) * (-1)) + c->dz;
 
 			//CALCULATE DIRECTION VECTOR
-			r[(j + (i * height))].dx = (r[(j + (i * height))].x - r[(j + (i * height))].ox);
-			r[(j + (i * height))].dy = (r[(j + (i * height))].y - r[(j + (i * height))].oy);
-			r[(j + (i * height))].dz = (r[(j + (i * height))].z - r[(j + (i * height))].oz);
+			r[getPixel(i, j)].dx = (r[getPixel(i, j)].x - r[getPixel(i, j)].ox);
+			r[getPixel(i, j)].dy = (r[getPixel(i, j)].y - r[getPixel(i, j)].oy);
+			r[getPixel(i, j)].dz = (r[getPixel(i, j)].z - r[getPixel(i, j)].oz);
 
 			//NORMALIZE
-			temp = sqrt(square(r[(j + (i * height))].dx) + (square(r[(j + (i * height))].dy)) + (square(r[(j + (i * height))].dz)));
+			temp = sqrt(square(r[getPixel(i, j)].dx) + (square(r[getPixel(i, j)].dy)) + (square(r[getPixel(i, j)].dz)));
 
-			r[(j + (i * height))].dx /= temp;
-			r[(j + (i * height))].dy /= temp;
-			r[(j + (i * height))].dz /= temp;
+			r[getPixel(i, j)].dx /= temp;
+			r[getPixel(i, j)].dy /= temp;
+			r[getPixel(i, j)].dz /= temp;
 
 
 			//ASSIGN RAYS TO VECTORS TO MAKE IT SIMPLE TO PASS VECTORS THROUGH FUNCTIONS
-			oRay.x = r[(j + (i * height))].ox;
-			oRay.y = r[(j + (i * height))].oy;
-			oRay.z = r[(j + (i * height))].oz;
+			oRay.x = r[getPixel(i, j)].ox;
+			oRay.y = r[getPixel(i, j)].oy;
+			oRay.z = r[getPixel(i, j)].oz;
 
-			ray.x = r[(j + (i * height))].dx;
-			ray.y = r[(j + (i * height))].dy;
-			ray.z = r[(j + (i * height))].dz;
+			ray.x = r[getPixel(i, j)].dx;
+			ray.y = r[getPixel(i, j)].dy;
+			ray.z = r[getPixel(i, j)].dz;
 
-			hit[j + (i * width)] = 0;
+			hit[getPixel(i, j)] = 0;
 
 			//CALL RAY TRACE ALGORITHM
-			rayShoot(oRay, ray, MAX_BOUNCES, i, j, cl[j + (i * width)]);
+			rayShoot(oRay, ray, MAX_BOUNCES, i, j, cl[getPixel(i, j)]);
 			//IF OBJECT HAS COLLIDED DRAW THE OBJECT AT{j, i}
-			if (hit[j + (i * width)] != 0)
+			if (hit[getPixel(i, j)] != 0)
 			{
-				o[j + (i * height)].r = q[j + (i * width)].r;
-				o[j + (i * height)].g = q[j + (i * width)].g;
-				o[j + (i * height)].b = q[j + (i * width)].b;
+				o[getPixel(i, j)].r = q[getPixel(i, j)].r;
+				o[getPixel(i, j)].g = q[getPixel(i, j)].g;
+				o[getPixel(i, j)].b = q[getPixel(i, j)].b;
 			}
 			else
 			{
-				o[j + (i * height)].r = 0.05;
-				o[j + (i * height)].g = 0.2;
-				o[j + (i * height)].b = 0.5;
+				o[getPixel(i, j)].r = 0.05;
+				o[getPixel(i, j)].g = 0.2;
+				o[getPixel(i, j)].b = 0.5;
 			}
 			
 		}
@@ -1360,7 +1365,7 @@ void threading()
 	{
 		for (int j = 0; j < width; j++)
 		{	
-			glColor3f(o[j + (i*height)].r, o[j + (i*height)].g, o[j + (i*height)].b);
+			glColor3f(o[getPixel(i, j)].r, o[getPixel(i, j)].g, o[getPixel(i, j)].b);
 			glVertex2i(j, i);
 		}
 	}
